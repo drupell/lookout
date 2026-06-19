@@ -1,0 +1,60 @@
+{
+  "scored_deals": [
+    {
+      "listing_id": "LST-001",
+      "overall_score": 0.92,
+      "score_breakdown": {
+        "price_score": 0.95,
+        "financing_score": 1.0,
+        "incentive_score": 0.85,
+        "preference_match_score": 0.88,
+        "reasoning": "Excellent deal: 10% below MSRP with 0% APR financing. Eligible for federal tax credit."
+      },
+      "effective_out_of_pocket_usd": 4000.0,
+      "trade_in_value_at_scoring": 20000.0,
+      "applicable_incentives": ["Federal EV Tax Credit $7,500", "DE Clean Vehicle Rebate $2,500"],
+      "dealer_name": "Delaware Chevrolet",
+      "year": 2025,
+      "make": "Chevrolet",
+      "model": "Equinox EV"
+    },
+    {
+      "listing_id": "LST-002",
+      "overall_score": 0.72,
+      "score_breakdown": {
+        "price_score": 0.65,
+        "financing_score": 0.70,
+        "incentive_score": 0.75,
+        "preference_match_score": 0.78,
+        "reasoning": "Decent deal: 5% below MSRP, 2.9% APR is acceptable but not exceptional."
+      },
+      "effective_out_of_pocket_usd": 12400.0,
+      "trade_in_value_at_scoring": 20000.0,
+      "applicable_incentives": ["Federal EV Tax Credit $7,500"],
+      "dealer_name": "Wilmington Hyundai",
+      "year": 2024,
+      "make": "Hyundai",
+      "model": "Ioniq 5"
+    },
+    {
+      "listing_id": "LST-003",
+      "overall_score": 0.45,
+      "score_breakdown": {
+        "price_score": 0.40,
+        "financing_score": 0.30,
+        "incentive_score": 0.55,
+        "preference_match_score": 0.55,
+        "reasoning": "Below average: minimal discount, high APR, far from home."
+      },
+      "effective_out_of_pocket_usd": 18000.0,
+      "trade_in_value_at_scoring": 20000.0,
+      "applicable_incentives": [],
+      "dealer_name": "Newark Kia",
+      "year": 2024,
+      "make": "Kia",
+      "model": "EV6"
+    }
+  ],
+  "model_used": "mock-model",
+  "scored_at": "2026-04-05T12:00:00Z"
+}

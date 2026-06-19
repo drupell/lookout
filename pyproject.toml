@@ -1,0 +1,110 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lookout"
+version = "0.1.0"
+description = "Agentic AI system for passive market deal monitoring"
+requires-python = ">=3.12"
+dependencies = [
+    "langgraph>=0.2.0",
+    "langchain-core>=0.3.0",
+    "langchain-anthropic>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-aws>=0.2.0",
+    "langchain-community>=0.3.0",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "boto3>=1.35.0",
+    "playwright>=1.40.0",
+    "faiss-cpu>=1.7.4",
+    "beautifulsoup4>=4.12.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23.0",
+    "moto[dynamodb,secretsmanager]>=5.0",
+    "aws-cdk-lib>=2.150.0",
+    "constructs>=10.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+]
+dashboard = [
+    "streamlit>=1.40",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["evals"]
+pythonpath = ["."]
+filterwarnings = [
+    "ignore::DeprecationWarning:importlib._bootstrap",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+# Opinionated rule set — catches real bugs, enforces modern Python, blocks
+# common security footguns. Anything ignored should be justified inline.
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes (unused imports, undefined names)
+    "I",   # isort (import order)
+    "N",   # pep8-naming
+    "W",   # pycodestyle warnings
+    "UP",  # pyupgrade (use modern syntax)
+    "B",   # flake8-bugbear (likely bugs)
+    "C4",  # flake8-comprehensions (better list/dict/set comp idioms)
+    "SIM", # flake8-simplify (simpler equivalents)
+    "RUF", # ruff-specific rules
+    "TCH", # flake8-type-checking (move type-only imports under TYPE_CHECKING)
+    "S",   # flake8-bandit (security)
+]
+# Project-wide allowed exceptions — justified globally, not per-file.
+ignore = [
+    "E501",   # line length — handled by formatter, not linter
+    "S101",   # `assert` is fine in tests
+    "S311",   # PRNG — we don't use random for crypto
+    "B008",   # function calls in arg defaults (Pydantic Field uses this)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"evals/**" = [
+    "S101",  # asserts everywhere, that's the point
+    "S105",  # hardcoded test passwords are fine
+    "S106",
+    "B017",  # `pytest.raises(Exception)` is fine in tests when checking "anything fails"
+]
+"scripts/**" = [
+    "T201",  # print() is the point of debug scripts
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+# CDK is JSII-generated and untyped at the level mypy wants.
+module = ["aws_cdk.*", "constructs.*", "moto.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Don't type-check the dashboard/Streamlit code yet.
+module = ["src.dashboard.*"]
+ignore_errors = true

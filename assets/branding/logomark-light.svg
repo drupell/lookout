@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="128" height="128" fill="none" role="img" aria-label="Lookout logomark">
+  <!-- Lookout: scope on the horizon. Honey-amber (#B06E1A) for light backgrounds. -->
+  <circle cx="12" cy="12" r="9" stroke="#B06E1A" stroke-width="1.75"/>
+  <path d="M4.6 14.4 H19.4" stroke="#B06E1A" stroke-width="1.75" stroke-linecap="round"/>
+  <path d="M8.4 14.4 a3.6 3.6 0 0 1 7.2 0" stroke="#B06E1A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 5.4 V7.4" stroke="#B06E1A" stroke-width="1.75" stroke-linecap="round"/>
+</svg>

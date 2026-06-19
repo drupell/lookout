@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" role="img" aria-label="Lookout favicon">
+  <!-- Favicon variant: honey-amber on warm-ivory tile so it reads at 16/32px -->
+  <rect width="24" height="24" rx="4" fill="#FBF7EF"/>
+  <circle cx="12" cy="12" r="8" stroke="#B06E1A" stroke-width="2"/>
+  <path d="M5 14.4 H19" stroke="#B06E1A" stroke-width="2" stroke-linecap="round"/>
+  <path d="M8.4 14.4 a3.6 3.6 0 0 1 7.2 0" stroke="#B06E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,44 @@
+[
+  {
+    "listing_id": "LST-001",
+    "make": "Chevrolet",
+    "model": "Equinox EV",
+    "year": 2025,
+    "msrp": 35000.0,
+    "selling_price": 31500.0,
+    "effective_apr": 0.0,
+    "lease_monthly": null,
+    "dealer_name": "Delaware Chevrolet",
+    "dealer_distance_miles": 12.3,
+    "url": "https://example.com/listing/001",
+    "is_ev": true
+  },
+  {
+    "listing_id": "LST-002",
+    "make": "Hyundai",
+    "model": "Ioniq 5",
+    "year": 2024,
+    "msrp": 42000.0,
+    "selling_price": 39900.0,
+    "effective_apr": 2.9,
+    "lease_monthly": 389.0,
+    "dealer_name": "Wilmington Hyundai",
+    "dealer_distance_miles": 8.7,
+    "url": "https://example.com/listing/002",
+    "is_ev": true
+  },
+  {
+    "listing_id": "LST-003",
+    "make": "Kia",
+    "model": "EV6",
+    "year": 2024,
+    "msrp": 44000.0,
+    "selling_price": 42500.0,
+    "effective_apr": 3.9,
+    "lease_monthly": null,
+    "dealer_name": "Newark Kia",
+    "dealer_distance_miles": 22.1,
+    "url": "https://example.com/listing/003",
+    "is_ev": true
+  }
+]

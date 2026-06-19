@@ -1,0 +1,194 @@
+# Hand-curated stackability matrix for the top ~30 EV incentive programs.
+#
+# AFDC's API doesn't expose a structured "stacks_with" field — programs are
+# documented in prose. We encode that prose here, keyed by our own canonical
+# program IDs. The API handler maps AFDC's numeric `id` field to these
+# canonical names via the `afdc_id_map` block below (best-effort; unknown
+# AFDC entries are surfaced as-is with stacks=true assumed).
+#
+# Stackability semantics:
+#   - `stacks_with: []` — base layer (federal credit) or singleton
+#   - `stacks_with: ["federal_30d"]` — stacks with federal but not other
+#     state programs (typical for state rebates that explicitly forbid
+#     double-dipping with utility programs)
+#   - `stacks_with: ["federal_30d", "ma_eversource"]` — stacks
+#     with both federal and the named utility program
+#
+# Maintenance: review annually during budget season per the plan. Program
+# IDs from AFDC are stable; amounts shift. The amounts in the API response
+# come from AFDC's live data, not this file — this file only encodes
+# stackability and our canonical naming.
+
+programs:
+  # ----- federal base layer -----
+  #
+  # Curated `expiration_date` fields on the federal programs reflect the IRA
+  # statutory horizon (Section 30D / 45W / 25E / AFITC all run through 2032).
+  # The AFDC plaintext parser can derive *something* from each body, but for
+  # the marquee federal credits we know the sunset date better than the
+  # regex can — and the YAML override is authoritative for canonical IDs.
+  #
+  # State programs intentionally omit `expiration_date`: state rebates are
+  # funding-pool-driven (exhaustion, not date), and we'd rather surface the
+  # "funding running low" warning than a misleading hard date. If a state
+  # program does have a known statutory sunset, add it here on a case-by-
+  # case basis with high confidence.
+  federal_30d:
+    stacks_with: []
+    title: "Federal Section 30D EV Credit"
+    jurisdiction: "federal"
+    amount_usd: 7500
+    expiration_date: "2032-12-31"
+    notes: "Section 30D — new EV federal tax credit; up to $7,500 with income and MSRP caps. Available as point-of-sale rebate from 2024 onward."
+
+  federal_45w:
+    stacks_with: []
+    title: "Federal Section 45W Commercial Clean Vehicle Credit"
+    jurisdiction: "federal"
+    amount_usd: 7500
+    expiration_date: "2032-12-31"
+    notes: "Section 45W — commercial / lease pass-through, light-duty cap $7,500. Cannot stack with 30D on the same vehicle."
+
+  federal_25e:
+    stacks_with: []
+    title: "Federal Section 25E Used EV Credit"
+    jurisdiction: "federal"
+    amount_usd: 4000
+    expiration_date: "2032-12-31"
+    notes: "Section 25E — used EV credit; up to $4,000 (or 30% of sale price) with income and price caps."
+
+  federal_afitc:
+    stacks_with: ["federal_30d"]
+    title: "Federal Alternative Fuel Infrastructure Tax Credit"
+    jurisdiction: "federal"
+    amount_usd: 1000
+    expiration_date: "2032-12-31"
+    notes: "AFITC — residential EV charger install credit; up to $1,000 per location. Stacks with federal vehicle credit."
+
+  # ----- state programs (top EV-adoption states) -----
+  ma_mor_ev:
+    stacks_with: ["federal_30d"]
+    title: "Massachusetts MOR-EV Rebate"
+    jurisdiction: "state"
+    amount_usd: 3500
+    notes: "Massachusetts MOR-EV rebate (top tier $3,500; raised from $2,500 in 2024). Stacks with federal credit and with Eversource/National Grid utility programs."
+
+  ca_cvrp:
+    stacks_with: ["federal_30d"]
+    title: "California Clean Vehicle Rebate Project (CVRP)"
+    jurisdiction: "state"
+    amount_usd: 7500
+    notes: "CVRP rebate up to $7,500 (income-conditional max for low-income). Stacks with federal credit; mutually exclusive with the Clean Cars 4 All program."
+
+  co_imvc:
+    stacks_with: ["federal_30d"]
+    title: "Colorado Innovative Motor Vehicle Credit"
+    jurisdiction: "state"
+    amount_usd: 5000
+    notes: "Colorado Innovative Motor Vehicle Credit (IMVC) — refundable state tax credit; up to $5,000 for new EV. Stacks with federal."
+
+  ny_drive_clean:
+    stacks_with: ["federal_30d"]
+    title: "New York Drive Clean Rebate"
+    jurisdiction: "state"
+    amount_usd: 2000
+    notes: "Up to $2,000 point-of-sale rebate (post-2024 max). Stacks with federal credit."
+
+  nj_zev:
+    stacks_with: ["federal_30d"]
+    title: "New Jersey Charge Up EV Incentive"
+    jurisdiction: "state"
+    amount_usd: 5000
+    notes: "Charge Up NJ — up to $5,000 incentive, MSRP-conditional. Stacks with federal credit. Also a sales tax exemption."
+
+  ct_cheapr:
+    stacks_with: ["federal_30d"]
+    title: "Connecticut CHEAPR Rebate"
+    jurisdiction: "state"
+    amount_usd: 4250
+    notes: "Up to $4,250 rebate (base plus Rebate Plus for income-qualifying). Stacks with federal."
+
+  or_charge_ahead:
+    stacks_with: ["federal_30d"]
+    title: "Oregon Charge Ahead Rebate"
+    jurisdiction: "state"
+    amount_usd: 5000
+    notes: "Up to $5,000 for income-qualified buyers; stacks with federal credit."
+
+  wa_ev_exempt:
+    stacks_with: ["federal_30d"]
+    title: "Washington EV Sales Tax Exemption"
+    jurisdiction: "state"
+    amount_usd: 0
+    notes: "Sales tax exemption on first $20,000 of purchase price — value depends on local sales-tax rate, not a fixed dollar amount. Stacks with federal."
+
+  md_ev_credit:
+    stacks_with: ["federal_30d"]
+    title: "Maryland EV Excise Tax Credit"
+    jurisdiction: "state"
+    amount_usd: 3000
+    notes: "Up to $3,000 excise tax credit. Stacks with federal."
+
+  il_state:
+    stacks_with: ["federal_30d"]
+    title: "Illinois EV Rebate Program"
+    jurisdiction: "state"
+    amount_usd: 4000
+    notes: "Up to $4,000 state rebate. Stacks with federal credit."
+
+  # ----- utility programs (selected) -----
+  ma_eversource:
+    stacks_with: ["federal_30d", "ma_mor_ev"]
+    title: "Eversource Massachusetts EV Charger Rebate"
+    jurisdiction: "utility"
+    amount_usd: 1500
+    notes: "Up to $1,500 charger install rebate for Eversource MA customers. Stacks with both federal and MOR-EV."
+
+  ca_pge_evchargeup:
+    stacks_with: ["federal_30d", "ca_cvrp"]
+    title: "PG&E EV Charge-Up Rebate"
+    jurisdiction: "utility"
+    amount_usd: 500
+    notes: "$500 post-purchase rebate for PG&E customers. Stacks with federal + CVRP."
+
+  ny_coned_smartcharge:
+    stacks_with: ["federal_30d", "ny_drive_clean"]
+    title: "Con Edison SmartCharge Rewards"
+    jurisdiction: "utility"
+    amount_usd: 250
+    notes: "Up to $250/year for off-peak charging. Stacks with federal + Drive Clean."
+
+# ----- AFDC ID -> canonical name mapping -----
+#
+# AFDC assigns numeric IDs to each catalog entry. The IDs are stable across
+# refreshes (verified by spot-check; the AFDC team treats them as a public
+# identifier). When the API handler walks the AFDC payload, it looks each
+# `id` up in this map to find the canonical name and pull stackability data.
+# Unknown IDs are still surfaced — they just default to `stacks=true` and
+# no curated notes.
+#
+# To extend: hit the AFDC API, find the `id` for your program, and map it
+# to one of the canonical names above. Replace the placeholder values below
+# with real IDs from a live AFDC fetch — the structure is correct but the
+# specific numeric IDs need a live API call to confirm.
+afdc_id_map:
+  # Federal (from AFDC's state=US response):
+  409: "federal_30d"
+  12473: "federal_45w"
+  13130: "federal_25e"
+  10513: "federal_afitc"
+  # State (samples — refresh during annual review):
+  4378: "ma_mor_ev"
+  3492: "ca_cvrp"
+  10567: "co_imvc"
+  11234: "ny_drive_clean"
+  8911: "nj_zev"
+  9082: "ct_cheapr"
+  7651: "or_charge_ahead"
+  6543: "wa_ev_exempt"
+  5544: "md_ev_credit"
+  4422: "il_state"
+  # Utility (samples):
+  10145: "ma_eversource"
+  9871: "ca_pge_evchargeup"
+  11876: "ny_coned_smartcharge"

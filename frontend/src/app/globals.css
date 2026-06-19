@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light + dark surface tokens. Components reference these so the dark variant
+   is a single change here, not 30 files. Body uses Tailwind classes that read
+   from these. */
+:root {
+  color-scheme: light dark;
+  --bg-app: rgb(251 247 239); /* warm ivory */
+  --bg-surface: rgb(255 253 250); /* a hair warm vs white */
+  --fg-default: rgb(28 23 20); /* warm near-black */
+  --fg-muted: rgb(107 96 82); /* warm muted */
+  --border-default: rgb(232 224 210); /* warm hairline */
+  --ring: rgb(214 142 43); /* honey-amber focus ring */
+  --paper-top: rgb(251 247 239); /* #FBF7EF warm ivory */
+  --paper-bottom: rgb(255 255 255); /* white */
+}
+
+/* Dark theme is class-driven (`.dark` stamped on <html> by ThemeProvider) so
+   the user can pin auto/light/dark from the sidebar toggle. The no-flash
+   script in layout.tsx sets the class before paint based on the stored
+   preference + system pref. */
+:root.dark {
+  --bg-app: rgb(23 19 15); /* #17130F warm near-black */
+  --bg-surface: rgb(28 23 20); /* #1C1714 warm dark surface */
+  --fg-default: rgb(251 247 239); /* warm ivory */
+  --fg-muted: rgb(160 147 130); /* warm muted */
+  --border-default: rgb(51 41 31); /* warm dark border */
+  --ring: rgb(214 156 70); /* lighter honey for dark bg */
+  --paper-top: rgb(23 19 15); /* #17130F */
+  --paper-bottom: rgb(28 23 20); /* #1C1714 */
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  /* Sunlit paper: a barely-there top-to-bottom gradient over the app surface
+     (warm ivory → white in light; warm near-black in dark). The gradient is
+     fixed so it reads as a single sheet of paper as you scroll. */
+  background: var(--bg-app);
+  background-image: linear-gradient(to bottom, var(--paper-top), var(--paper-bottom));
+  background-attachment: fixed;
+  color: var(--fg-default);
+  font-feature-settings: "ss01", "cv11"; /* nice Inter alt forms when present */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Whisper-faint paper grain. A tiny inline SVG fractal-noise tile, fixed and
+   pointer-transparent, sits above the gradient at a very low opacity so the
+   "paper" gains texture without any runtime cost or perceptible color. It is
+   layered via a fixed ::before so it never scrolls or intercepts clicks. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Keep app content above the grain layer. */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+:root.dark body::before {
+  opacity: 0.04;
+}
+
+/* Tabular numerals for any element with this class — used on prices, counts. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus ring used by all interactive components. Visible only on keyboard
+   navigation, never on click-focus, to match Stripe's quiet aesthetic. */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.focus-ring:focus-visible {
+  outline-color: var(--ring);
+}
+
+/* Hairline "editorial rule" — a quiet divider with a touch more presence than
+   a plain border. Use as a section break under display headings. */
+.editorial-rule {
+  border: 0;
+  border-top: 1px solid var(--border-default);
+}
+
+/* Staggered list entrance. Children opt in with `.stagger-item`; we walk the
+   first dozen and nudge their fade-in-up delay so a list cascades in. The
+   animation itself lives in Tailwind (`animate-fade-in-up`). */
+.stagger-item {
+  animation-delay: calc(var(--stagger-index, 0) * 45ms);
+}
+
+/* Respect the user's wishes: no decorative motion when reduced-motion is on.
+   Essential feedback (focus, color) is untouched — only transforms/fades. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  body {
+    background-attachment: scroll;
+  }
+}

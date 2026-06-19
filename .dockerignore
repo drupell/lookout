@@ -1,0 +1,14 @@
+cdk.out
+infrastructure/cdk.out
+.venv
+.git
+.github
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+docs
+evals/*
+!evals/fixtures
+node_modules

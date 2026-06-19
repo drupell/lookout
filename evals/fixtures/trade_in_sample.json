@@ -1,0 +1,20 @@
+{
+  "vin": "SAMPLEVIN00000000",
+  "sources": [
+    {
+      "source_name": "kbb",
+      "estimate_usd": 19500.0,
+      "estimate_type": "trade_in",
+      "fetched_at": "2026-04-05T12:00:00Z"
+    },
+    {
+      "source_name": "carmax",
+      "estimate_usd": 20500.0,
+      "estimate_type": "instant_offer",
+      "fetched_at": "2026-04-05T12:00:00Z"
+    }
+  ],
+  "average_estimate_usd": 20000.0,
+  "lowest_estimate_usd": 19500.0,
+  "highest_estimate_usd": 20500.0
+}

@@ -1,0 +1,6 @@
+{
+  "source": "aws.events",
+  "detail-type": "Scheduled Event",
+  "detail": {},
+  "resources": ["arn:aws:events:us-east-1:123456789012:rule/lookout-schedule"]
+}

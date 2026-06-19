@@ -1,0 +1,53 @@
+vehicle:
+  vin: "SAMPLEVIN00000000"
+  mileage: 50000
+  condition: "good"
+  trade_in_floor_usd: 18000
+
+search:
+  location_zip: "10001"
+  radius_miles: 75
+  max_vehicle_age_years: 3
+  body_styles: ["sedan", "hatchback", "crossover", "suv"]
+  # MarketCheck fuel-type values. Empty list = no filter.
+  # Examples: ["Electric"], ["Electric", "Plug-in Hybrid"], []
+  fuel_types: ["Electric"]
+  # Price bounds (USD). 0 = no lower bound; 0 = no upper bound.
+  min_price_usd: 0
+  max_price_usd: 40000
+  # Odometer ceiling (miles). 0 = no upper bound. Same convention as prices.
+  max_mileage_miles: 0
+  # Adaptive pagination: keep fetching until we have target_listings useful
+  # results after filters, OR we hit max_pages. Each page = 500 rows = 1 API call.
+  # MarketCheck's free tier has a hard 500-row pagination limit — requesting
+  # `start=500` returns a 422. The default is 1 page so a single call covers
+  # the whole free-tier budget; BYOK users on paid tiers can raise this.
+  target_listings: 50
+  max_pages: 1
+
+# Empty included_brands = include all brands (subject to excluded_brands).
+# Non-empty = ONLY these brands. excluded_brands always wins if both name the same brand.
+included_brands: []
+excluded_brands: ["Hyundai", "Kia", "Cadillac", "RAM", "Tesla"]
+excluded_models: []
+
+deal_criteria:
+  max_effective_monthly_usd: 450
+  min_discount_off_msrp_pct: 8.0
+  acceptable_apr_max: 2.9
+  lease_to_own_preferred: true
+  zero_percent_financing_preferred: true
+
+scoring:
+  threshold_notify: 0.75
+  threshold_draft_email: 0.80
+
+# Default-tier users inherit this schedule and can't change it from the dashboard.
+# BYOK users can edit it (days_of_week + time_of_day_utc).
+# Default: weekly on Thursday at 13:00 UTC (≈9am ET / 6am PT / 2pm UK) — a
+# balanced window so fresh listings land before most users' day.
+schedule:
+  # Weekdays to run on: 0=Mon … 6=Sun. [3] = weekly Thursday (default).
+  # Any subset works: [0,3] = Mon & Thu, all seven = daily.
+  days_of_week: [3]
+  time_of_day_utc: "13:00"   # UTC
