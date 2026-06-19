@@ -1,0 +1,46 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# --- Secrets / local config ---
+.env
+.env.*
+!.env.example
+
+# --- Claude Code local (machine paths / personal config — never publish) ---
+.claude/settings.local.json
+.claude/worktrees/
+.claude/*.lock
+
+# --- Generated / runtime ---
+*.faiss
+*.pkl
+cdk.out/
+response.json
+
+# --- Frontend (Next.js) ---
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache
+
+# --- Editor / OS ---
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
