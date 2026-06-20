@@ -1,0 +1,126 @@
+name: ci
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev, main]
+  workflow_call: {} # reused by deploy-prod as the strict gate
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+
+env:
+  # Security scanners BLOCK when targeting prod (PR into main, or a push to
+  # main via deploy-prod's workflow_call); warn-only otherwise (dev iteration).
+  STRICT: ${{ github.base_ref == 'main' || github.ref == 'refs/heads/main' }}
+  UV_VERSION: "0.11.21"
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --extra dev
+      - name: Lint
+        run: |
+          uv run ruff check src/ evals/ infrastructure/ scripts/
+          uv run ruff format --check src/ evals/ infrastructure/ scripts/
+      - name: Type check (non-blocking)
+        run: uv run mypy src/ || echo "mypy non-blocking — fix incrementally"
+      - name: Eval suite
+        run: uv run pytest evals/ -v --tb=short
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: CDK synth
+        run: |
+          npm install -g aws-cdk
+          cd infrastructure && cdk synth >/dev/null
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history for gitleaks
+
+      # Secrets ALWAYS block (even on dev). Personal-account repo → no license.
+      - name: gitleaks (secret scan)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: pip-audit (Python deps from uv.lock)
+        run: |
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt -o /tmp/req.txt
+          uvx pip-audit -r /tmp/req.txt || [ "$STRICT" != true ]
+
+      - name: npm audit (frontend)
+        run: |
+          cd frontend && npm ci
+          npm audit --audit-level=low || [ "$STRICT" != true ]
+
+      - name: Build image for scanning
+        # Scans an amd64 build; the OS/dep CVE set is arch-identical to the
+        # deployed arm64 Lambda image, so this is a faithful CVE proxy.
+        run: docker build -t lookout:${{ github.sha }} .
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: lookout:${{ github.sha }}
+          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+          ignore-unfixed: false
+          exit-code: ${{ env.STRICT == 'true' && '1' || '0' }}
+
+      - name: Trivy filesystem scan (deps / IaC / secrets)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+          exit-code: ${{ env.STRICT == 'true' && '1' || '0' }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Checkov (IaC policy baseline)
+        run: |
+          npm install -g aws-cdk
+          cd infrastructure && cdk synth >/dev/null && cd ..
+          BASE=$(paste -sd, security/checkov-baseline.txt)
+          if [ "$STRICT" = true ]; then
+            uvx checkov -d infrastructure/cdk.out --framework cloudformation --check "$BASE" --compact
+          else
+            uvx checkov -d infrastructure/cdk.out --framework cloudformation --check "$BASE" --compact --soft-fail
+          fi
+
+  no-open-prs:
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Fail if any other PR is open
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          others=$(gh pr list --repo "$REPO" --state open --json number \
+            --jq "[.[] | select(.number != ${PR_NUMBER})] | length")
+          if [ "$others" -ne 0 ]; then
+            echo "::error::${others} other open PR(s) — close them before merging dev→main"
+            exit 1
+          fi
+          echo "No other open PRs ✓"
