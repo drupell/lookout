@@ -19,7 +19,7 @@ US_EAST_1 = cdk.Environment(region="us-east-1")
 
 # --- GitHub OIDC deploy roles (one per account; each deployed separately) ---
 
-GitHubOidcStack(
+dev_oidc = GitHubOidcStack(
     app,
     "LookoutDevOidc",
     role_name="lookout-gha-dev",
@@ -28,7 +28,7 @@ GitHubOidcStack(
     description="GitHub Actions OIDC deploy role — dev account",
 )
 
-GitHubOidcStack(
+prod_oidc = GitHubOidcStack(
     app,
     "LookoutProdOidc",
     role_name="lookout-gha-prod",
@@ -163,4 +163,14 @@ prod_monitoring = MonitoringStack(
     description="Lookout Monitoring — Prod environment",
 )
 
-app.synth()
+# --- Tags: every resource carries Project, Environment, ManagedBy ---
+
+cdk.Tags.of(app).add("Project", "Lookout")
+cdk.Tags.of(app).add("ManagedBy", "cdk")
+for stack in (dev_oidc, dev_dashboard, dev_auth, dev_agent, dev_api, dev_monitoring):
+    cdk.Tags.of(stack).add("Environment", "dev")
+for stack in (prod_oidc, prod_dashboard, prod_auth, prod_agent, prod_api, prod_monitoring):
+    cdk.Tags.of(stack).add("Environment", "prod")
+
+if __name__ == "__main__":
+    app.synth()
