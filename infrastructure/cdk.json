@@ -1,5 +1,5 @@
 {
-  "app": "PYTHONPATH=.. uv run python app.py",
+  "app": "PYTHONPATH=.. uv run --extra dev python app.py",
   "watch": {
     "include": ["**"],
     "exclude": [

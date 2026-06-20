@@ -95,13 +95,10 @@ jobs:
       - name: Checkov (IaC policy baseline)
         run: |
           npm install -g aws-cdk
-          cd infrastructure && cdk synth >/dev/null && cd ..
+          (cd infrastructure && cdk synth >/dev/null)
           BASE=$(paste -sd, security/checkov-baseline.txt)
-          if [ "$STRICT" = true ]; then
-            uvx checkov -d infrastructure/cdk.out --framework cloudformation --check "$BASE" --compact
-          else
-            uvx checkov -d infrastructure/cdk.out --framework cloudformation --check "$BASE" --compact --soft-fail
-          fi
+          SOFT=$([ "$STRICT" = true ] && echo "" || echo "--soft-fail")
+          uvx checkov -d infrastructure/cdk.out --framework cloudformation --check "$BASE" --compact $SOFT
 
   no-open-prs:
     if: github.base_ref == 'main'
