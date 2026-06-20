@@ -437,6 +437,7 @@ class AgentStack(Stack):
             self,
             "RunsDLQ",
             queue_name=f"{prefix}-runs-dlq",
+            encryption=sqs.QueueEncryption.SQS_MANAGED,
             retention_period=Duration.days(14),
             removal_policy=config.removal_policy,
         )
@@ -444,6 +445,7 @@ class AgentStack(Stack):
             self,
             "RunsQueue",
             queue_name=f"{prefix}-runs",
+            encryption=sqs.QueueEncryption.SQS_MANAGED,
             visibility_timeout=Duration.seconds(config.lambda_timeout_seconds * 6),
             retention_period=Duration.days(4),
             dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=2, queue=self.runs_dlq),
