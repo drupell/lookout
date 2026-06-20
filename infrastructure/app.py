@@ -10,11 +10,32 @@ from infrastructure.stacks.agent_stack import AgentStack
 from infrastructure.stacks.api_stack import ApiStack
 from infrastructure.stacks.auth_stack import AuthStack
 from infrastructure.stacks.dashboard_stack import DashboardStack
+from infrastructure.stacks.github_oidc_stack import GitHubOidcStack
 from infrastructure.stacks.monitoring_stack import MonitoringStack
 
 app = cdk.App()
 
 US_EAST_1 = cdk.Environment(region="us-east-1")
+
+# --- GitHub OIDC deploy roles (one per account; each deployed separately) ---
+
+GitHubOidcStack(
+    app,
+    "LookoutDevOidc",
+    role_name="lookout-gha-dev",
+    subject="repo:drupell/lookout:ref:refs/heads/dev",
+    env=US_EAST_1,
+    description="GitHub Actions OIDC deploy role — dev account",
+)
+
+GitHubOidcStack(
+    app,
+    "LookoutProdOidc",
+    role_name="lookout-gha-prod",
+    subject="repo:drupell/lookout:environment:production",
+    env=US_EAST_1,
+    description="GitHub Actions OIDC deploy role — prod account",
+)
 
 # --- Dev Environment ---
 
