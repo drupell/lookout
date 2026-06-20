@@ -1,0 +1,81 @@
+{
+  "planPath": "docs/superpowers/plans/2026-06-19-dso-cicd-pipeline.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 0: Checkov IaC policy baseline",
+      "status": "pending",
+      "description": "**Goal:** Documented, version-controlled IaC security standard (Checkov check-ID allowlist) prod is held to with zero tolerance.\n\n**Files:** Create security/iac-policy.md, security/checkov-baseline.txt\n\n**Acceptance Criteria:** iac-policy.md documents in/out-of-scope checks + rationale; baseline.txt drives CI; checkov --check runs only baseline.\n\n**Verify:** cd infrastructure && cdk synth >/dev/null && checkov -d cdk.out --framework cloudformation --check $(paste -sd, ../security/checkov-baseline.txt) --compact\n\n```json:metadata\n{\"files\": [\"security/iac-policy.md\", \"security/checkov-baseline.txt\"], \"verifyCommand\": \"cd infrastructure && cdk synth >/dev/null && checkov -d cdk.out --framework cloudformation --check $(paste -sd, ../security/checkov-baseline.txt) --compact\", \"acceptanceCriteria\": [\"policy documented\", \"baseline.txt drives CI\", \"checkov runs only baseline\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 1: Minimize Lambda base-image CVE surface",
+      "status": "pending",
+      "description": "**Goal:** Replace public.ecr.aws/lambda/python:3.12 so trivy image passes under zero-tolerance.\n\n**Files:** Modify Dockerfile\n\n**Acceptance Criteria:** arm64 build + handler loads via awslambdaric; trivy image all-severity = 0 (or only accepted no-fix); FAISS imports.\n\n**Verify:** docker build --platform linux/arm64 -t lookout-test . && trivy image --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL lookout-test\n\n```json:metadata\n{\"files\": [\"Dockerfile\"], \"verifyCommand\": \"docker build --platform linux/arm64 -t lookout-test . && trivy image --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL lookout-test\", \"acceptanceCriteria\": [\"arm64 build + handler\", \"trivy 0 findings\", \"FAISS imports\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 2: Per-account OIDC deploy roles (exact-match env-scoped trust)",
+      "status": "pending",
+      "blockedBy": [],
+      "description": "**Goal:** Two least-privilege OIDC roles with StringEquals trust; LookoutDevOidc/LookoutProdOidc in app.py.\n\n**Files:** Modify infrastructure/stacks/github_oidc_stack.py, infrastructure/app.py; Test evals/test_oidc_stack.py\n\n**Acceptance Criteria:** dev StringEquals ref sub; prod StringEquals environment:production sub; AssumeRole on exactly 4 cdk-hnb659fds-* ARNs; synth ok; pytest asserts no StringLike.\n\n**Verify:** cd infrastructure && cdk synth LookoutDevOidc LookoutProdOidc >/dev/null && cd .. && PYTHONPATH=\"$PWD:$PWD/.venv/lib/python3.12/site-packages\" $(uv python find 3.12) -m pytest evals/test_oidc_stack.py -v\n\n```json:metadata\n{\"files\": [\"infrastructure/stacks/github_oidc_stack.py\", \"infrastructure/app.py\", \"evals/test_oidc_stack.py\"], \"verifyCommand\": \"cd infrastructure && cdk synth LookoutDevOidc LookoutProdOidc >/dev/null\", \"acceptanceCriteria\": [\"dev ref sub StringEquals\", \"prod env sub StringEquals\", \"4-ARN AssumeRole\", \"no StringLike\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 3: CDK resource tagging (Project/Environment/ManagedBy)",
+      "status": "pending",
+      "blockedBy": [2],
+      "description": "**Goal:** Every CDK resource tagged Project/Environment/ManagedBy.\n\n**Files:** Modify infrastructure/app.py; Test evals/test_tagging.py\n\n**Acceptance Criteria:** dev Environment=dev, prod Environment=prod, Project=Lookout + ManagedBy=cdk app-wide.\n\n**Verify:** PYTHONPATH=\"$PWD:$PWD/.venv/lib/python3.12/site-packages\" $(uv python find 3.12) -m pytest evals/test_tagging.py -v\n\n```json:metadata\n{\"files\": [\"infrastructure/app.py\", \"evals/test_tagging.py\"], \"verifyCommand\": \"PYTHONPATH=\\\"$PWD:$PWD/.venv/lib/python3.12/site-packages\\\" $(uv python find 3.12) -m pytest evals/test_tagging.py -v\", \"acceptanceCriteria\": [\"dev=dev\", \"prod=prod\", \"Project+ManagedBy\"], \"modelTier\": \"mechanical\"}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 4: [USER-RUN] Bootstrap accounts + deploy OIDC stacks",
+      "status": "pending",
+      "blockedBy": [2],
+      "description": "**Goal:** OIDC providers + roles exist in both accounts (USER runs deploys; agent surfaces commands).\n\n**Files:** none\n\n**Acceptance Criteria:** both accounts bootstrapped (prod CFN-exec scoped); LookoutDevOidc->dev, LookoutProdOidc->prod; ARNs captured.\n\n**Verify:** aws iam get-role --role-name lookout-gha-dev && aws iam get-role --role-name lookout-gha-prod\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"aws iam get-role --role-name lookout-gha-dev && aws iam get-role --role-name lookout-gha-prod\", \"acceptanceCriteria\": [\"both bootstrapped\", \"OIDC deployed per account\", \"ARNs captured\"], \"modelTier\": \"mechanical\", \"userRun\": true}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 5: Configure GitHub — secrets, production environment, main ruleset, security settings",
+      "status": "pending",
+      "blockedBy": [4, 9],
+      "description": "**Goal:** Native enforcement + secrets via gh.\n\n**Files:** none\n\n**Acceptance Criteria:** AWS_DEV_DEPLOY_ROLE_ARN repo secret + AWS_PROD_DEPLOY_ROLE_ARN production env secret; production env + reviewer; main ruleset (PR-only, no direct push, include admins, required checks + CodeQL threshold all); secret scanning + push protection + Dependabot on.\n\n**Verify:** gh api repos/drupell/lookout/environments/production && gh api repos/drupell/lookout/rulesets\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"gh api repos/drupell/lookout/environments/production && gh api repos/drupell/lookout/rulesets\", \"acceptanceCriteria\": [\"both secrets\", \"prod env + reviewer\", \"main ruleset + CodeQL merge protection\", \"scanning on\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 6,
+      "subject": "Task 6: ci.yml — quality + zero-tolerance security suite + no-open-PR gate",
+      "status": "pending",
+      "blockedBy": [0, 1],
+      "description": "**Goal:** Validation workflow; warn dev / block PR-to-main; expose workflow_call (Task 8 reuses).\n\n**Files:** Create .github/workflows/ci.yml\n\n**Acceptance Criteria:** quality + security + no-open-prs jobs; STRICT=base_ref==main toggles hard/soft fail; on: push[dev] + pull_request[dev,main] + workflow_call; actionlint clean.\n\n**Verify:** actionlint .github/workflows/ci.yml\n\n```json:metadata\n{\"files\": [\".github/workflows/ci.yml\"], \"verifyCommand\": \"actionlint .github/workflows/ci.yml\", \"acceptanceCriteria\": [\"3 jobs\", \"warn dev / block main\", \"workflow_call\", \"actionlint clean\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 7,
+      "subject": "Task 7: deploy-dev.yml — auto-deploy dev on push",
+      "status": "pending",
+      "blockedBy": [4, 5, 6],
+      "description": "**Goal:** On push to dev after CI success, assume dev role, cdk deploy dev stacks.\n\n**Files:** Create .github/workflows/deploy-dev.yml\n\n**Acceptance Criteria:** workflow_run on ci success/branch dev; OIDC AWS_DEV_DEPLOY_ROLE_ARN; cdk deploy LookoutDev LookoutDevMonitoring; concurrency deploy-dev; actionlint clean.\n\n**Verify:** actionlint .github/workflows/deploy-dev.yml\n\n```json:metadata\n{\"files\": [\".github/workflows/deploy-dev.yml\"], \"verifyCommand\": \"actionlint .github/workflows/deploy-dev.yml\", \"acceptanceCriteria\": [\"workflow_run after ci\", \"dev role OIDC\", \"deploys dev+monitoring\", \"concurrency\"], \"modelTier\": \"mechanical\"}\n```"
+    },
+    {
+      "id": 8,
+      "subject": "Task 8: deploy-prod.yml — environment-gated prod deploy",
+      "status": "pending",
+      "blockedBy": [4, 5, 6],
+      "description": "**Goal:** On push to main, strict re-check then production-env approval pause then prod deploy.\n\n**Files:** Create .github/workflows/deploy-prod.yml\n\n**Acceptance Criteria:** push[main]; strict-gate uses ./.github/workflows/ci.yml; deploy job environment: production; OIDC AWS_PROD_DEPLOY_ROLE_ARN; cdk deploy LookoutProd LookoutProdMonitoring; concurrency deploy-prod; actionlint clean.\n\n**Verify:** actionlint .github/workflows/deploy-prod.yml\n\n```json:metadata\n{\"files\": [\".github/workflows/deploy-prod.yml\"], \"verifyCommand\": \"actionlint .github/workflows/deploy-prod.yml\", \"acceptanceCriteria\": [\"reusable strict gate\", \"environment: production pause\", \"prod role\", \"deploys prod+monitoring\"], \"modelTier\": \"standard\"}\n```"
+    },
+    {
+      "id": 9,
+      "subject": "Task 9: Dependabot + CodeQL enablement",
+      "status": "pending",
+      "blockedBy": [],
+      "description": "**Goal:** Dependency bumps + CodeQL feeding merge protection.\n\n**Files:** Create .github/dependabot.yml, .github/workflows/codeql.yml\n\n**Acceptance Criteria:** Dependabot pip/npm/actions; CodeQL python+js-ts security-extended on push/PR+schedule; results in Security tab.\n\n**Verify:** actionlint .github/workflows/codeql.yml\n\n```json:metadata\n{\"files\": [\".github/dependabot.yml\", \".github/workflows/codeql.yml\"], \"verifyCommand\": \"actionlint .github/workflows/codeql.yml\", \"acceptanceCriteria\": [\"dependabot 3 ecosystems\", \"CodeQL security-extended\", \"results in Security tab\"], \"modelTier\": \"mechanical\"}\n```"
+    },
+    {
+      "id": 10,
+      "subject": "Task 10: End-to-end verification",
+      "status": "pending",
+      "blockedBy": [5, 6, 7, 8, 9],
+      "description": "**Goal:** Prove the pipeline behaves per acceptance criteria on the real repo.\n\n**Files:** none\n\n**Acceptance Criteria:** dev push auto-deploys; vuln PR blocked; second PR triggers no-open-prs block; direct push to main rejected; clean merge -> production approval gate -> prod deploys; prod role un-assumable outside env.\n\n**Verify:** observe Actions runs; prod job aws sts get-caller-identity = prod account.\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"gh run list --repo drupell/lookout --limit 10\", \"acceptanceCriteria\": [\"dev auto-deploy\", \"vuln PR blocked\", \"no-open-prs blocks\", \"main direct push rejected\", \"prod env gate\", \"prod role isolated\"], \"modelTier\": \"standard\"}\n```"
+    }
+  ],
+  "lastUpdated": "2026-06-19T00:00:00Z"
+}
