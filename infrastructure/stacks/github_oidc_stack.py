@@ -70,7 +70,7 @@ class GitHubOidcStack(Stack):
                     },
                 },
             ),
-            description=f"GitHub Actions deploy role — {subject}",
+            description=f"GitHub Actions deploy role for {subject}",
         )
 
         # Only permission needed: assume this account's four CDK bootstrap roles.
@@ -90,5 +90,5 @@ class GitHubOidcStack(Stack):
             self,
             "DeployRoleArn",
             value=self.deploy_role.role_arn,
-            description=f"Deploy role ARN for {role_name} — set as a GitHub secret",
+            description=f"Deploy role ARN for {role_name} (set as a GitHub secret)",
         )
