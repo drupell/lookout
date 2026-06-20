@@ -1,24 +1,24 @@
 .PHONY: dev install eval lint format typecheck test check pause resume synth diff-dev diff-prod deploy-dev deploy-prod dashboard install-dashboard wipe-dev-deals invoke-dev fresh-run frontend-install frontend-dev frontend-lint frontend-format frontend-typecheck frontend-test frontend-check frontend-build frontend-deploy-dev frontend-deploy-prod diff-dashboard-dev diff-dashboard-prod deploy-dashboard-dev deploy-dashboard-prod
 
 install:
-	pip install -e ".[dev]"
+	uv sync --extra dev
 
 dev: install
-	playwright install chromium
+	uv run playwright install chromium
 
 eval:
-	python -m pytest evals/ -v --tb=short
+	uv run pytest evals/ -v --tb=short
 
 lint:
-	ruff check src/ evals/ infrastructure/ scripts/
-	ruff format --check src/ evals/ infrastructure/ scripts/
+	uv run ruff check src/ evals/ infrastructure/ scripts/
+	uv run ruff format --check src/ evals/ infrastructure/ scripts/
 
 format:
-	ruff check --fix src/ evals/ infrastructure/ scripts/
-	ruff format src/ evals/ infrastructure/ scripts/
+	uv run ruff check --fix src/ evals/ infrastructure/ scripts/
+	uv run ruff format src/ evals/ infrastructure/ scripts/
 
 typecheck:
-	mypy src/
+	uv run mypy src/
 
 test: lint eval
 
@@ -47,10 +47,10 @@ deploy-prod:
 	cd infrastructure && cdk deploy LookoutProd --require-approval never
 
 install-dashboard:
-	pip install -e ".[dashboard]"
+	uv sync --extra dashboard
 
 dashboard:
-	PYTHONPATH=. streamlit run src/dashboard/app.py
+	PYTHONPATH=. uv run streamlit run src/dashboard/app.py
 
 # --- Next.js dashboard (frontend/) ---
 

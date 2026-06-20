@@ -78,17 +78,17 @@ graph TD
 
 ### Prerequisites
 
-- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) — Python venv + dependency manager
+- Python 3.12+ (uv fetches/manages it)
 - Node.js 20+ (for CDK CLI)
 - AWS account with CDK bootstrapped
 
 ### Setup
 
 ```bash
-# Clone and install
+# Clone and install (uv creates the venv + installs from uv.lock)
 git clone <repo-url> && cd lookout
-python -m venv .venv && source .venv/bin/activate
-make install
+uv sync --extra dev
 
 # Run the eval suite (no AWS or API keys needed)
 make eval
