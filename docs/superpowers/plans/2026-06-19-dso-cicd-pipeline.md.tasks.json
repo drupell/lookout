@@ -4,7 +4,7 @@
     {
       "id": 0,
       "subject": "Task 0: Checkov IaC policy baseline",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Documented, version-controlled IaC security standard (Checkov check-ID allowlist) prod is held to with zero tolerance.\n\n**Files:** Create security/iac-policy.md, security/checkov-baseline.txt\n\n**Acceptance Criteria:** iac-policy.md documents in/out-of-scope checks + rationale; baseline.txt drives CI; checkov --check runs only baseline.\n\n**Verify:** cd infrastructure && cdk synth >/dev/null && checkov -d cdk.out --framework cloudformation --check $(paste -sd, ../security/checkov-baseline.txt) --compact\n\n```json:metadata\n{\"files\": [\"security/iac-policy.md\", \"security/checkov-baseline.txt\"], \"verifyCommand\": \"cd infrastructure && cdk synth >/dev/null && checkov -d cdk.out --framework cloudformation --check $(paste -sd, ../security/checkov-baseline.txt) --compact\", \"acceptanceCriteria\": [\"policy documented\", \"baseline.txt drives CI\", \"checkov runs only baseline\"], \"modelTier\": \"standard\"}\n```"
     },
     {
@@ -16,14 +16,14 @@
     {
       "id": 2,
       "subject": "Task 2: Per-account OIDC deploy roles (exact-match env-scoped trust)",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [],
       "description": "**Goal:** Two least-privilege OIDC roles with StringEquals trust; LookoutDevOidc/LookoutProdOidc in app.py.\n\n**Files:** Modify infrastructure/stacks/github_oidc_stack.py, infrastructure/app.py; Test evals/test_oidc_stack.py\n\n**Acceptance Criteria:** dev StringEquals ref sub; prod StringEquals environment:production sub; AssumeRole on exactly 4 cdk-hnb659fds-* ARNs; synth ok; pytest asserts no StringLike.\n\n**Verify:** cd infrastructure && cdk synth LookoutDevOidc LookoutProdOidc >/dev/null && cd .. && PYTHONPATH=\"$PWD:$PWD/.venv/lib/python3.12/site-packages\" $(uv python find 3.12) -m pytest evals/test_oidc_stack.py -v\n\n```json:metadata\n{\"files\": [\"infrastructure/stacks/github_oidc_stack.py\", \"infrastructure/app.py\", \"evals/test_oidc_stack.py\"], \"verifyCommand\": \"cd infrastructure && cdk synth LookoutDevOidc LookoutProdOidc >/dev/null\", \"acceptanceCriteria\": [\"dev ref sub StringEquals\", \"prod env sub StringEquals\", \"4-ARN AssumeRole\", \"no StringLike\"], \"modelTier\": \"standard\"}\n```"
     },
     {
       "id": 3,
       "subject": "Task 3: CDK resource tagging (Project/Environment/ManagedBy)",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [2],
       "description": "**Goal:** Every CDK resource tagged Project/Environment/ManagedBy.\n\n**Files:** Modify infrastructure/app.py; Test evals/test_tagging.py\n\n**Acceptance Criteria:** dev Environment=dev, prod Environment=prod, Project=Lookout + ManagedBy=cdk app-wide.\n\n**Verify:** PYTHONPATH=\"$PWD:$PWD/.venv/lib/python3.12/site-packages\" $(uv python find 3.12) -m pytest evals/test_tagging.py -v\n\n```json:metadata\n{\"files\": [\"infrastructure/app.py\", \"evals/test_tagging.py\"], \"verifyCommand\": \"PYTHONPATH=\\\"$PWD:$PWD/.venv/lib/python3.12/site-packages\\\" $(uv python find 3.12) -m pytest evals/test_tagging.py -v\", \"acceptanceCriteria\": [\"dev=dev\", \"prod=prod\", \"Project+ManagedBy\"], \"modelTier\": \"mechanical\"}\n```"
     },
@@ -65,7 +65,7 @@
     {
       "id": 9,
       "subject": "Task 9: Dependabot + CodeQL enablement",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [],
       "description": "**Goal:** Dependency bumps + CodeQL feeding merge protection.\n\n**Files:** Create .github/dependabot.yml, .github/workflows/codeql.yml\n\n**Acceptance Criteria:** Dependabot pip/npm/actions; CodeQL python+js-ts security-extended on push/PR+schedule; results in Security tab.\n\n**Verify:** actionlint .github/workflows/codeql.yml\n\n```json:metadata\n{\"files\": [\".github/dependabot.yml\", \".github/workflows/codeql.yml\"], \"verifyCommand\": \"actionlint .github/workflows/codeql.yml\", \"acceptanceCriteria\": [\"dependabot 3 ecosystems\", \"CodeQL security-extended\", \"results in Security tab\"], \"modelTier\": \"mechanical\"}\n```"
     },
