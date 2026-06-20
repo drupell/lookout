@@ -1,0 +1,40 @@
+name: deploy-prod
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write # OIDC role assumption
+  contents: read
+  security-events: write # strict-gate (ci.yml) SARIF uploads
+  pull-requests: read
+
+jobs:
+  # Strict re-check: ci.yml runs with STRICT=true (security BLOCKS) on main.
+  strict-gate:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: strict-gate
+    runs-on: ubuntu-latest
+    environment: production # required-reviewer approval pause + prod-role sub match
+    concurrency: deploy-prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.11.21"
+      - run: uv sync --extra dev
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g aws-cdk
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Diff prod (final review in logs)
+        run: cd infrastructure && cdk diff LookoutProd LookoutProdMonitoring || true
+      - name: Deploy prod stacks
+        run: cd infrastructure && cdk deploy LookoutProd LookoutProdMonitoring --require-approval never

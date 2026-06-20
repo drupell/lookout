@@ -10,7 +10,7 @@
     {
       "id": 1,
       "subject": "Task 1: Minimize Lambda base-image CVE surface",
-      "status": "pending",
+      "status": "completed",
       "description": "**Goal:** Replace public.ecr.aws/lambda/python:3.12 so trivy image passes under zero-tolerance.\n\n**Files:** Modify Dockerfile\n\n**Acceptance Criteria:** arm64 build + handler loads via awslambdaric; trivy image all-severity = 0 (or only accepted no-fix); FAISS imports.\n\n**Verify:** docker build --platform linux/arm64 -t lookout-test . && trivy image --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL lookout-test\n\n```json:metadata\n{\"files\": [\"Dockerfile\"], \"verifyCommand\": \"docker build --platform linux/arm64 -t lookout-test . && trivy image --exit-code 1 --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL lookout-test\", \"acceptanceCriteria\": [\"arm64 build + handler\", \"trivy 0 findings\", \"FAISS imports\"], \"modelTier\": \"standard\"}\n```"
     },
     {
@@ -44,21 +44,21 @@
     {
       "id": 6,
       "subject": "Task 6: ci.yml — quality + zero-tolerance security suite + no-open-PR gate",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [0, 1],
       "description": "**Goal:** Validation workflow; warn dev / block PR-to-main; expose workflow_call (Task 8 reuses).\n\n**Files:** Create .github/workflows/ci.yml\n\n**Acceptance Criteria:** quality + security + no-open-prs jobs; STRICT=base_ref==main toggles hard/soft fail; on: push[dev] + pull_request[dev,main] + workflow_call; actionlint clean.\n\n**Verify:** actionlint .github/workflows/ci.yml\n\n```json:metadata\n{\"files\": [\".github/workflows/ci.yml\"], \"verifyCommand\": \"actionlint .github/workflows/ci.yml\", \"acceptanceCriteria\": [\"3 jobs\", \"warn dev / block main\", \"workflow_call\", \"actionlint clean\"], \"modelTier\": \"standard\"}\n```"
     },
     {
       "id": 7,
       "subject": "Task 7: deploy-dev.yml — auto-deploy dev on push",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [4, 5, 6],
       "description": "**Goal:** On push to dev after CI success, assume dev role, cdk deploy dev stacks.\n\n**Files:** Create .github/workflows/deploy-dev.yml\n\n**Acceptance Criteria:** workflow_run on ci success/branch dev; OIDC AWS_DEV_DEPLOY_ROLE_ARN; cdk deploy LookoutDev LookoutDevMonitoring; concurrency deploy-dev; actionlint clean.\n\n**Verify:** actionlint .github/workflows/deploy-dev.yml\n\n```json:metadata\n{\"files\": [\".github/workflows/deploy-dev.yml\"], \"verifyCommand\": \"actionlint .github/workflows/deploy-dev.yml\", \"acceptanceCriteria\": [\"workflow_run after ci\", \"dev role OIDC\", \"deploys dev+monitoring\", \"concurrency\"], \"modelTier\": \"mechanical\"}\n```"
     },
     {
       "id": 8,
       "subject": "Task 8: deploy-prod.yml — environment-gated prod deploy",
-      "status": "pending",
+      "status": "completed",
       "blockedBy": [4, 5, 6],
       "description": "**Goal:** On push to main, strict re-check then production-env approval pause then prod deploy.\n\n**Files:** Create .github/workflows/deploy-prod.yml\n\n**Acceptance Criteria:** push[main]; strict-gate uses ./.github/workflows/ci.yml; deploy job environment: production; OIDC AWS_PROD_DEPLOY_ROLE_ARN; cdk deploy LookoutProd LookoutProdMonitoring; concurrency deploy-prod; actionlint clean.\n\n**Verify:** actionlint .github/workflows/deploy-prod.yml\n\n```json:metadata\n{\"files\": [\".github/workflows/deploy-prod.yml\"], \"verifyCommand\": \"actionlint .github/workflows/deploy-prod.yml\", \"acceptanceCriteria\": [\"reusable strict gate\", \"environment: production pause\", \"prod role\", \"deploys prod+monitoring\"], \"modelTier\": \"standard\"}\n```"
     },

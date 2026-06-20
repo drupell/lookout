@@ -1,11 +1,9 @@
 name: ci
 
 on:
-  push:
-    branches: [dev]
   pull_request:
     branches: [dev, main]
-  workflow_call: {} # reused by deploy-prod as the strict gate
+  workflow_call: {} # reused by deploy-dev (gate) and deploy-prod (strict gate)
 
 permissions:
   contents: read
