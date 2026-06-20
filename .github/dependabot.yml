@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Python deps (pyproject.toml + uv.lock; Dependabot's pip ecosystem handles uv).
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Frontend deps (Next.js dashboard).
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # GitHub Actions pinned versions.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
